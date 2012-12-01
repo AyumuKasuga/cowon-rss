@@ -8,7 +8,8 @@ r = redis.from_url(os.environ['REDISTOGO_URL'])
 
 @app.route('/')
 def index():
-    return r.get('index.html', 'None')
+    ret = r.get('index.html')
+    return ret if ret else 'None'
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
