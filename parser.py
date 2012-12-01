@@ -7,6 +7,7 @@ from datetime import datetime
 import rfc822
 import sys
 import os
+import redis
 
 def update_index():
     url_index = 'http://www.cowonglobal.com/zeroboard/zboard.php?id=C08&bmenu=support'
@@ -118,8 +119,7 @@ class CowonRss():
 
 
 if __name__ == "__main__":
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    static_path = os.path.abspath(os.path.join(root_path, 'static'))
+    r = redis.from_url(os.environ['REDISTOGO_URL'])
     main_index = update_index()
     if len(main_index) == 0:
         sys.exit()
@@ -127,14 +127,12 @@ if __name__ == "__main__":
     for category_id, category_name in main_index.items():
         index_html += "<li><a href='/static/%s.rss'>%s</a></li>" % (category_id, category_name)
     index_html = "<html><head></head><body><ul>%s</ul><br>last update: %s</body>" % (index_html, datetime.now().isoformat())
-    with open(os.path.abspath(os.path.join(static_path, 'index.html')), 'w') as f:
-        f.write(index_html)
+    r.set('index.html', index_html)
 
     for category_id, category_name in main_index.items():
         cowon_rss = CowonRss(category_id, category_name)
         cowon_rss.parse_items()
-        with open(os.path.abspath(os.path.join(static_path, '%s.rss' % category_id)), 'w') as f:
-            try:
-                f.write(cowon_rss.rss())
-            except UnicodeEncodeError:
-                f.write('UnicodeEncodeError')
+        try:
+            r.set('%s.rss' % category_id, cowon_rss.rss())
+        except UnicodeEncodeError:
+            r.set('%s.rss' % category_id, 'error')
