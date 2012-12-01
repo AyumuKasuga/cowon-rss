@@ -125,7 +125,7 @@ if __name__ == "__main__":
         sys.exit()
     index_html = ""
     for category_id, category_name in main_index.items():
-        index_html += "<li><a href='/static/%s.rss'>%s</a></li>" % (category_id, category_name)
+        index_html += "<li><a href='%s.rss'>%s</a></li>" % (category_id, category_name)
     index_html = "<html><head></head><body><ul>%s</ul><br>last update: %s</body>" % (index_html, datetime.now().isoformat())
     r.set('index.html', index_html)
 
