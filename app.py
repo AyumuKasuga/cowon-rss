@@ -3,6 +3,7 @@ from flask import Flask
 from flask import Response
 from flask import render_template
 from flask import abort
+from flask import request
 import redis
 from json import loads
 
@@ -14,7 +15,7 @@ r = redis.from_url(os.environ['REDISTOGO_URL'])
 def index():
     items = r.get('index.html')
     last_update = r.get('last_update')
-    return render_template('index.html', items=loads(items), last_update=last_update)
+    return render_template('index.html', host=request.headers.get('Host'), items=loads(items), last_update=last_update)
 
 @app.route('/<cat_id>.rss')
 def rss(cat_id):

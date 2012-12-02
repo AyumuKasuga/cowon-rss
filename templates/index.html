@@ -14,7 +14,7 @@
         {% for item in items %}
         <tr>
             <td><a href="/{{ item.id }}.rss">{{ item.title }}</a></td>
-            <td><input style="width: 100%" type="text" value="http://cowon-rss.herokuapp.com/{{ item.id }}.rss"></td>
+            <td><input style="width: 100%" type="text" value="http://{{ host }}/{{ item.id }}.rss"></td>
         </tr>
         {% endfor %}
     </table>
