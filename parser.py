@@ -49,20 +49,15 @@ class CowonRss():
         req = requests.post(self.url, data=self.data_dict)
         soup = BeautifulSoup(req.text)
         self.items = []
-        for link in soup.findAll('a', **{'class': 'list_link'}):
+        for tr in soup.findAll('tr', height='20'):
             param = {}
-            param['link'] = 'http://www.cowonglobal.com/zeroboard/%s' % link['href']
-            req_item = requests.get(param['link'])
-            soup_item = BeautifulSoup(req_item.text)
-            param['title'] = soup_item.find('td', **{'class': 'board_title'}).text
-            src_date = soup_item.findAll('td', **{'class': 't9_4a4d4a'})[1].text
-            date = datetime.strptime(src_date, '%d-%m-%Y %H:%M:%S')
+            src_date = tr.findAll('td', {'class': 't7_gray'})[1].text
+            date = datetime.strptime(src_date, '%d/%m/%y')
             param['date'] = rfc822.formatdate(rfc822.mktime_tz(rfc822.parsedate_tz(date.strftime("%a, %d %b %Y %H:%M:%S"))))
-            body_text = soup_item.find('table', **{'class': 'body'})
-            if body_text:
-                param['text'] = body_text.text
-            else:
-                param['text'] = 'None'
+            ahref = tr.find('a', {'class': 'list_link'})
+            param['link'] = 'http://www.cowonglobal.com/zeroboard/%s' % ahref['href']
+            param['title'] = ahref.text
+            param['text'] = ahref.text
             self.items.append(param)
 
 
@@ -121,18 +116,22 @@ class CowonRss():
 if __name__ == "__main__":
     r = redis.from_url(os.environ['REDISTOGO_URL'])
     main_index = update_index()
-    if len(main_index) == 0:
+    len_main_index = len(main_index)
+    if len_main_index == 0:
         sys.exit()
     index_html = ""
     for category_id, category_name in main_index.items():
         index_html += "<li><a href='%s.rss'>%s</a></li>" % (category_id, category_name)
-    index_html = "<html><head></head><body><ul>%s</ul><br>last update: %s</body>" % (index_html, datetime.now().isoformat())
+    index_html = "<html><head></head><body><ul>%s</ul><br>last update: %s</body>" % (index_html, datetime.now().isoformat(sep=' '))
     r.set('index.html', index_html)
 
+    i = 0
     for category_id, category_name in main_index.items():
+        i += 1
+        print "%s/%s" % (i, len_main_index)
         cowon_rss = CowonRss(category_id, category_name)
         cowon_rss.parse_items()
         try:
             r.set('%s.rss' % category_id, cowon_rss.rss())
         except UnicodeEncodeError:
-            r.set('%s.rss' % category_id, 'error')
+            r.set('%s.rss' % category_id, 'error parsing')
