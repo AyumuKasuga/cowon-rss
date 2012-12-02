@@ -1,0 +1,4 @@
+rss for cowon firmware updates
+http://cowon-rss.herokuapp.com/
+Run parser.py every day.
+Tags: Flask, cowon, rss, firmware
