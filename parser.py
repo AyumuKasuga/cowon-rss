@@ -58,7 +58,7 @@ class CowonRss():
             ahref = tr.find('a', {'class': 'list_link'})
             param['link'] = 'http://www.cowonglobal.com/zeroboard/%s' % ahref['href']
             param['title'] = ahref.text
-            param['text'] = '%s %s' % (ahref.text, param['date'])
+            param['text'] = '%s; date: %s' % (ahref.text, param['date'])
             self.items.append(param)
 
 
