@@ -8,6 +8,7 @@ import rfc822
 import sys
 import os
 import redis
+from json import dumps
 
 def update_index():
     url_index = 'http://www.cowonglobal.com/zeroboard/zboard.php?id=C08&bmenu=support'
@@ -119,11 +120,11 @@ if __name__ == "__main__":
     len_main_index = len(main_index)
     if len_main_index == 0:
         sys.exit()
-    index_html = ""
+    index_html = []
     for category_id, category_name in main_index.items():
-        index_html += "<li><a href='%s.rss'>%s</a></li>" % (category_id, category_name)
-    index_html = "<html><head></head><body><ul>%s</ul><br>last update: %s</body>" % (index_html, datetime.now().isoformat(sep=' '))
-    r.set('index.html', index_html)
+        index_html.append({'id': category_id, 'title': category_name})
+    r.set('index.html', dumps(index_html))
+    r.set('last_update', datetime.now().isoformat(sep=' '))
 
     i = 0
     for category_id, category_name in main_index.items():
@@ -131,7 +132,4 @@ if __name__ == "__main__":
         print "%s/%s" % (i, len_main_index)
         cowon_rss = CowonRss(category_id, category_name)
         cowon_rss.parse_items()
-        try:
-            r.set('%s.rss' % category_id, cowon_rss.rss())
-        except UnicodeEncodeError:
-            r.set('%s.rss' % category_id, 'error parsing')
+        r.set('%s.rss' % category_id, cowon_rss.rss())

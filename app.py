@@ -1,7 +1,10 @@
 import os
 from flask import Flask
 from flask import Response
+from flask import render_template
+from flask import abort
 import redis
+from json import loads
 
 app = Flask(__name__)
 r = redis.from_url(os.environ['REDISTOGO_URL'])
@@ -9,8 +12,9 @@ r = redis.from_url(os.environ['REDISTOGO_URL'])
 
 @app.route('/')
 def index():
-    ret = r.get('index.html')
-    return ret if ret else 'None'
+    items = r.get('index.html')
+    last_update = r.get('last_update')
+    return render_template('index.html', items=loads(items), last_update=last_update)
 
 @app.route('/<cat_id>.rss')
 def rss(cat_id):
@@ -18,7 +22,7 @@ def rss(cat_id):
     if ret:
         return Response(ret, mimetype='application/rss+xml')
     else:
-        return 'None'
+        abort(404)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

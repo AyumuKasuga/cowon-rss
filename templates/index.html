@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>Cowon firmware RSS updates</title>
+    <meta name="keywords" content="cowon, rss, firmware update, players" />
+    <meta name="description" content="firmware updates for cowon players and devices" />
+</head>
+<body>
+<div>firmware updates for cowon players and devices</div>
+<h1>RSS channels:</h1>
+    <table style="border-width: 0;">
+        <tr><td style="width: 150px"></td><td style="width: 300px;"></td></tr>
+        {% for item in items %}
+        <tr>
+            <td><a href="/{{ item.id }}.rss">{{ item.title }}</a></td>
+            <td><input style="width: 100%" type="text" value="http://cowon-rss.herokuapp.com/{{ item.id }}.rss"></td>
+        </tr>
+        {% endfor %}
+    </table>
+last update: {{ last_update }}
+</body>
+</html>
