@@ -13,7 +13,7 @@ r = redis.from_url(os.environ['REDISTOGO_URL'])
 
 @app.route('/')
 def index():
-    items = r.get('index.html')
+    items = r.get('index')
     last_update = r.get('last_update')
     return render_template('index.html', host=request.headers.get('Host'), items=loads(items), last_update=last_update)
 

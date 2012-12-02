@@ -58,7 +58,7 @@ class CowonRss():
             ahref = tr.find('a', {'class': 'list_link'})
             param['link'] = 'http://www.cowonglobal.com/zeroboard/%s' % ahref['href']
             param['title'] = ahref.text
-            param['text'] = ahref.text
+            param['text'] = '%s %s' % (ahref.text, param['date'])
             self.items.append(param)
 
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     index_html = []
     for category_id, category_name in main_index.items():
         index_html.append({'id': category_id, 'title': category_name})
-    r.set('index.html', dumps(index_html))
+    r.set('index', dumps(index_html))
     r.set('last_update', datetime.now().isoformat(sep=' '))
 
     i = 0
